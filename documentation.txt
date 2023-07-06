@@ -1,0 +1,49 @@
+Assignment 5
+Roll no - 20CS30054
+Name - Swapnil Yasasvi
+Roll no - 20CS30058
+Name - Vineet Amol Pippal
+
+Data Structures
+
+struct message
+Data members:
+    size – size of the message
+    msg[MAX_MSG_SIZE] – message string of size MAX_MSG_SIZE (5000)
+
+struct table
+Data members:
+    idx – index of the first filled slot
+    size – number of entries out of 10 which are filled
+    msg_table – array of 10 message structures
+
+Here the table structure is used as a circular buffer. The idx variable is used to keep track of the first filled slot. The size variable is used to keep track of the number of entries in the table. The msg_table is an array of 10 message structures just like a circular buffer in Producer-Consumer problem.
+
+The message body which has to be sent and received is of the form: Header(message size of 4 bytes) + message body
+
+
+Locks Used:
+send_mutex 
+recv_mutex
+
+Condition Variables Used:
+send_cond
+recv_cond
+
+thread S:
+    First locks the critical section which is Send_Message Table here with the help of send_mutex lock and then have a conditional wait using conditonal variable(send_cond) if size of the the Send_Message Table is empty as their is nothing to pop ,Pops the message from Send_Message Table and decrement the Send_Message Table size and then sends signal to my_send function , and then look at the pop message size and add the message size as the header to the message body and then send this data in chunks of 1000 till no bytes remain to send.
+
+thread R:
+    Receives the data with recv call and then look at the header of the message of size 4 bytes and then receive the message body of size equal to the header and then push the message into the Received_Message Table.
+    Now it locks the critical section which is Received_Message Table with the help of recv_mutex lock and then have a condtitonal wait using conditional variable(recv_cond) if size of  table is full as their is no space to push the message ,push the message into the Received_Message Table and increment the Received_Message Table size and then sends signal to my_recv function.
+
+my_send function:
+    This fucntion takes the message buffer to be sent as input and then locks the critical section which is Send_Message Table with the help of send_mutex lock and then have a conditional wait using conditional variable(send_cond) if size of the Send_Message Table is full as their is no space to push the message ,push the message into the Send_Message Table and increment the Send_Message Table size and then sends signal to thread S.
+
+my_recv function:
+    This function takes the message buffer to be received as input and then locks the critical section which is Received_Message Table with the help of recv_mutex lock and then have a conditional wait using conditional variable(recv_cond) if size of the Received_Message Table is empty as their is nothing to pop ,Pops the message from Received_Message Table and decrement the Received_Message Table size and then sends signal to thread R.
+    The popped meesage is then copied into the message buffer to be received  and if the length of the received message is larger than the buffer size then the message is truncated and truncated part is dropped just like in UDP recvfrom call.
+
+
+
+
